@@ -1,0 +1,40 @@
+# ===== Java / Maven build output =====
+**/target/
+*.class
+*.jar
+bin/
+build/
+
+# ===== IDE / editor local settings =====
+.idea/
+.vscode/
+nbproject/private/
+*.iml
+
+# ===== Runtime database =====
+data/*
+!data/.gitkeep
+*.db
+*.db-wal
+*.db-shm
+
+# ===== Runtime logs =====
+logs/*
+!logs/.gitkeep
+*.log
+*.lck
+
+# ===== Secrets / local credentials =====
+config/email-secrets.properties
+.env
+*.secret
+*.key
+
+# ===== Release archives / binary packages =====
+release/
+*.zip
+*.rar
+
+# ===== OS-generated files =====
+Thumbs.db
+.DS_Store
