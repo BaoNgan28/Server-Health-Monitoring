@@ -21,11 +21,11 @@ Course project for **Computer Network Programming** — Group 10, class **23DTHA
 
 | MSSV | Họ và tên | Công việc đã thực hiện | Merge Requests / Pull Requests |
 |---|---|---|---|
-| 2380601424 | Nguyễn Thanh Bảo Ngân | Repository Owner / Agent Backend | Cập nhật sau từng tuần |
-| 2380601465 | Lê Huỳnh Ngọc | Network / Protocol / Security | Cập nhật sau từng tuần |
-| 2182310415 | Bùi Tấn Quốc Đạt | Database / Aggregation / Alert / Email | Cập nhật sau từng tuần |
-| 2380613311 | Nguyễn Phương Nam | Monitor Integration / Dashboard | Cập nhật sau từng tuần |
-| 2380601581 | Trương Thị Yến Nhi | Visualization / History / UI | Cập nhật sau từng tuần |
+| 2380601424 | Nguyễn Thanh Bảo Ngân | Repository skeleton, synchronization to main, Agent foundation | #22, #23, #24 |
+| 2380601465 | Lê Huỳnh Ngọc | Shared protocol foundation | #25 |
+| 2182310415 | Bùi Tấn Quốc Đạt | Data foundation / SQLite | #29 |
+| 2380613311 | Nguyễn Phương Nam | Monitor configuration foundation | #27 |
+| 2380601581 | Trương Thị Yến Nhi | Visualization foundation | #26 |
 
 ## Security
 
