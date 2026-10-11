@@ -3,6 +3,7 @@ package vn.edu.hutech.group10.monitoring.common.protocol;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import vn.edu.hutech.group10.monitoring.common.TestPackets;
 import vn.edu.hutech.group10.monitoring.common.model.ConfigAckMessage;
 import vn.edu.hutech.group10.monitoring.common.model.ConfigUpdateMessage;
 import vn.edu.hutech.group10.monitoring.common.model.TelemetryPacket;
@@ -29,29 +30,10 @@ class JsonMessageCodecTest {
         codec = new JsonMessageCodec();
     }
 
-    // Helper dependency-safe cho JsonMessageCodecTest ở Issue #3
-    private static TelemetryPacket telemetry(long sequence, long timestamp) {
-        TelemetryPacket packet = new TelemetryPacket();
-        packet.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION);
-        packet.setType(MessageType.TELEMETRY.wireName());
-        packet.setAgentId("AGENT-01");
-        packet.setHostname("UNIT-TEST-HOST");
-        packet.setSessionId("TEST-SESSION-1");
-        packet.setTimestamp(timestamp);
-        packet.setSequence(sequence);
-        packet.setCpuUsage(23.5d);
-        packet.setMemoryUsage(61.25d);
-        packet.setConnectionCount(42);
-        packet.setUptimeSeconds(3600L);
-        packet.setNetworkInBytesPerSecond(12345.5d);
-        packet.setNetworkOutBytesPerSecond(6789.25d);
-        return packet;
-    }
-
     @Test
     @DisplayName("A telemetry packet survives a round trip unchanged")
     void telemetryRoundTrip() {
-        TelemetryPacket original = telemetry(11L, 1_700_000_000_000L);
+        TelemetryPacket original = TestPackets.signedTelemetry(11L, 1_700_000_000_000L);
 
         TelemetryPacket decoded = codec.fromJson(codec.toJson(original), TelemetryPacket.class);
 
@@ -61,7 +43,7 @@ class JsonMessageCodecTest {
     @Test
     @DisplayName("Bytes round trip through UTF-8, including non-ASCII hostnames")
     void byteRoundTripKeepsUtf8() {
-        TelemetryPacket original = telemetry(1L, 1000L);
+        TelemetryPacket original = TestPackets.telemetry(1L, 1000L);
         original.setHostname("MAY-CHU-HA-NOI");
 
         byte[] encoded = codec.toBytes(original);
@@ -73,7 +55,7 @@ class JsonMessageCodecTest {
     @Test
     @DisplayName("Partial-buffer decoding reads only the requested range")
     void decodesFromBufferSlice() {
-        byte[] json = codec.toBytes(telemetry(4L, 2000L));
+        byte[] json = codec.toBytes(TestPackets.telemetry(4L, 2000L));
         byte[] buffer = new byte[json.length + 64];
         System.arraycopy(json, 0, buffer, 0, json.length);
 
@@ -101,7 +83,7 @@ class JsonMessageCodecTest {
     void peekTypeReadsDiscriminator() {
         assertAll(
                 () -> assertEquals(MessageType.TELEMETRY,
-                        codec.peekType(codec.toJson(telemetry(1L, 1L)))),
+                        codec.peekType(codec.toJson(TestPackets.telemetry(1L, 1L)))),
                 () -> assertEquals(MessageType.CONFIG_ACK,
                         codec.peekType("{\"type\":\"CONFIG_ACK\",\"status\":\"SUCCESS\"}")));
     }
