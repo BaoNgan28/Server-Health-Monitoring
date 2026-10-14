@@ -3,9 +3,13 @@ package vn.edu.hutech.group10.monitoring.monitor.core;
 import vn.edu.hutech.group10.monitoring.common.protocol.JsonMessageCodec;
 import vn.edu.hutech.group10.monitoring.common.security.PacketValidator;
 import vn.edu.hutech.group10.monitoring.common.security.ReplayProtector;
+import vn.edu.hutech.group10.monitoring.monitor.config.EmailConfig;
+import vn.edu.hutech.group10.monitoring.monitor.config.EmailConfigLoader;
 import vn.edu.hutech.group10.monitoring.monitor.config.MonitorConfig;
 import vn.edu.hutech.group10.monitoring.monitor.network.AgentTcpConnectionManager;
 import vn.edu.hutech.group10.monitoring.monitor.network.UdpTelemetryReceiver;
+import vn.edu.hutech.group10.monitoring.monitor.notification.CompositeNotifier;
+import vn.edu.hutech.group10.monitoring.monitor.notification.EmailNotifier;
 import vn.edu.hutech.group10.monitoring.monitor.notification.NoOpNotifier;
 import vn.edu.hutech.group10.monitoring.monitor.notification.Notifier;
 import vn.edu.hutech.group10.monitoring.monitor.repository.AgentRepository;
@@ -57,6 +61,7 @@ public class MonitorApplication implements AutoCloseable {
     private MetricRepository metricRepository;
     private AlertRepository alertRepository;
 
+    private EmailConfig emailConfig;
     private Notifier notifier;
 
     private AgentRegistry registry;
@@ -90,7 +95,8 @@ public class MonitorApplication implements AutoCloseable {
             metricRepository = new MetricRepository(database);
             alertRepository = new AlertRepository(database);
 
-            notifier = new NoOpNotifier("email subsystem pending Issue #15");
+            emailConfig = EmailConfigLoader.load();
+            notifier = buildNotifier(emailConfig);
 
             registry = new AgentRegistry(agentRepository, eventBus);
             registry.load();
@@ -134,6 +140,39 @@ public class MonitorApplication implements AutoCloseable {
             close();
             throw e;
         }
+    }
+
+    /**
+     * Builds the alert channel. Missing credentials give a no-op channel and a
+     * log line, never a startup failure.
+     */
+    private Notifier buildNotifier(EmailConfig email) {
+        if (email.isConfigured()) {
+            return new CompositeNotifier(EmailNotifier.withSmtp(email));
+        }
+        LOG.info(EmailConfigLoader.DISABLED_LOG_MESSAGE);
+        return new CompositeNotifier(new NoOpNotifier(email.getDisabledReason()));
+    }
+
+    /**
+     * Rebuilds the notifier from the current contents of the secrets file, so an
+     * operator can fill the file in and switch e-mail on without a restart.
+     */
+    public synchronized EmailConfig reloadEmailConfiguration() {
+        EmailConfig reloaded = EmailConfigLoader.load();
+        Notifier replacement = buildNotifier(reloaded);
+        Notifier previous = notifier;
+
+        emailConfig = reloaded;
+        notifier = replacement;
+        if (alertService != null) {
+            alertService = new AlertService(alertRepository, replacement, eventBus);
+            alertService.load();
+        }
+        if (previous != null) {
+            previous.close();
+        }
+        return reloaded;
     }
 
     @Override
@@ -227,6 +266,10 @@ public class MonitorApplication implements AutoCloseable {
 
     public UdpTelemetryReceiver getUdpReceiver() {
         return udpReceiver;
+    }
+
+    public EmailConfig getEmailConfig() {
+        return emailConfig;
     }
 
     public Notifier getNotifier() {
