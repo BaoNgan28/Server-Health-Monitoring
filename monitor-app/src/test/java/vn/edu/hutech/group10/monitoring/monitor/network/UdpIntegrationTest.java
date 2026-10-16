@@ -237,6 +237,7 @@ class UdpIntegrationTest {
 
         send(packet);
         await("the first delivery", () -> telemetryService.getAcceptedCount() == 1);
+        await("the row to be written", () -> metricRepository.countRaw() == 1L);
 
         send(packet);
         send(packet);
@@ -247,6 +248,7 @@ class UdpIntegrationTest {
         // A genuinely newer packet must still get through afterwards.
         send(signed(6L, 21.0d));
         await("the fresh packet", () -> telemetryService.getAcceptedCount() == 2);
+        await("the row to be written", () -> metricRepository.countRaw() == 2L);
         assertEquals(2L, metricRepository.countRaw());
     }
 
