@@ -1,5 +1,6 @@
 package vn.edu.hutech.group10.monitoring.monitor.ui;
 
+import vn.edu.hutech.group10.monitoring.common.model.AgentStatus;
 import vn.edu.hutech.group10.monitoring.common.util.AppPaths;
 import vn.edu.hutech.group10.monitoring.monitor.config.EmailConfig;
 import vn.edu.hutech.group10.monitoring.monitor.config.EmailConfigLoader;
@@ -20,6 +21,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,12 +52,17 @@ public class SettingsPanel extends JPanel {
     private final JButton testButton = new JButton("Send Test Email");
     private final JButton reloadButton = new JButton("Reload Email Configuration");
 
+    private JPanel notificationGrid;
+    private JPanel runtimeGrid;
+    private final List<JLabel> staticLabels = new ArrayList<>();
+    private final List<JLabel> valueLabels = new ArrayList<>();
+
     public SettingsPanel(MonitorApplication application) {
         super(new BorderLayout(8, 8));
         this.application = application;
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        setBackground(UiConstants.PANEL_BACKGROUND);
+        setBackground(UiConstants.getPanelBackground());
 
         add(buildNotificationCard(), BorderLayout.NORTH);
         add(buildRuntimeCard(), BorderLayout.CENTER);
@@ -63,94 +71,97 @@ public class SettingsPanel extends JPanel {
     }
 
     private JPanel buildNotificationCard() {
-        JPanel grid = new JPanel(new GridBagLayout());
-        grid.setBackground(UiConstants.CARD_BACKGROUND);
-        grid.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createTitledBorder("Notifications"),
-                BorderFactory.createEmptyBorder(8, 8, 8, 8)));
+        notificationGrid = new JPanel(new GridBagLayout());
+        notificationGrid.setBackground(UiConstants.getCardBackground());
+        updateNotificationCardBorder();
 
         GridBagConstraints labels = new GridBagConstraints();
         labels.gridx = 0;
         labels.anchor = GridBagConstraints.LINE_END;
-        labels.insets = new Insets(3, 4, 3, 10);
+        labels.insets = new Insets(4, 6, 4, 12);
 
         GridBagConstraints values = new GridBagConstraints();
         values.gridx = 1;
         values.anchor = GridBagConstraints.LINE_START;
         values.fill = GridBagConstraints.HORIZONTAL;
         values.weightx = 1.0d;
-        values.insets = new Insets(3, 0, 3, 4);
+        values.insets = new Insets(4, 0, 4, 6);
 
         int row = 0;
-        row = addRow(grid, labels, values, row, "Email Notification Status:", emailStatusValue);
-        row = addRow(grid, labels, values, row, "Sender:", senderValue);
-        row = addRow(grid, labels, values, row, "Recipient:", recipientValue);
-        row = addRow(grid, labels, values, row, "SMTP:", serverValue);
-        row = addRow(grid, labels, values, row, "Secrets File:", secretsFileValue);
-        addRow(grid, labels, values, row, "Reason:", reasonValue);
+        row = addRow(notificationGrid, labels, values, row, "Email Notification Status:", emailStatusValue);
+        row = addRow(notificationGrid, labels, values, row, "Sender:", senderValue);
+        row = addRow(notificationGrid, labels, values, row, "Recipient:", recipientValue);
+        row = addRow(notificationGrid, labels, values, row, "SMTP Server:", serverValue);
+        row = addRow(notificationGrid, labels, values, row, "Secrets File:", secretsFileValue);
+        addRow(notificationGrid, labels, values, row, "Reason / Note:", reasonValue);
 
+        testButton.setText("✉ Send Test Email");
+        testButton.setFont(UiConstants.SUBTITLE_FONT);
         testButton.addActionListener(event -> onSendTestEmail());
+
+        reloadButton.setText("🔄 Reload Configuration");
+        reloadButton.setFont(UiConstants.SUBTITLE_FONT);
         reloadButton.addActionListener(event -> onReload());
 
-        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 8));
         buttons.setOpaque(false);
         buttons.add(testButton);
         buttons.add(reloadButton);
 
         JPanel card = new JPanel(new BorderLayout());
         card.setOpaque(false);
-        card.add(grid, BorderLayout.CENTER);
+        card.add(notificationGrid, BorderLayout.CENTER);
         card.add(buttons, BorderLayout.SOUTH);
         return card;
     }
 
     private JPanel buildRuntimeCard() {
-        JPanel grid = new JPanel(new GridBagLayout());
-        grid.setBackground(UiConstants.CARD_BACKGROUND);
-        grid.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createTitledBorder("Runtime"),
-                BorderFactory.createEmptyBorder(8, 8, 8, 8)));
+        runtimeGrid = new JPanel(new GridBagLayout());
+        runtimeGrid.setBackground(UiConstants.getCardBackground());
+        updateRuntimeCardBorder();
 
         GridBagConstraints labels = new GridBagConstraints();
         labels.gridx = 0;
         labels.anchor = GridBagConstraints.LINE_END;
-        labels.insets = new Insets(3, 4, 3, 10);
+        labels.insets = new Insets(4, 6, 4, 12);
 
         GridBagConstraints values = new GridBagConstraints();
         values.gridx = 1;
         values.anchor = GridBagConstraints.LINE_START;
         values.fill = GridBagConstraints.HORIZONTAL;
         values.weightx = 1.0d;
-        values.insets = new Insets(3, 0, 3, 4);
+        values.insets = new Insets(4, 0, 4, 6);
 
         var config = application.getConfig();
         int row = 0;
-        row = addRow(grid, labels, values, row, "Profile:", value(config.getProfileName()));
-        row = addRow(grid, labels, values, row, "UDP Listen Port:",
+        row = addRow(runtimeGrid, labels, values, row, "Active Profile:", value(config.getProfileName()));
+        row = addRow(runtimeGrid, labels, values, row, "UDP Listen Port:",
                 value(String.valueOf(config.getUdpPort())));
-        row = addRow(grid, labels, values, row, "Heartbeat Timeout:",
+        row = addRow(runtimeGrid, labels, values, row, "Heartbeat Timeout:",
                 value(config.getHeartbeatTimeoutMs() + " ms"));
-        row = addRow(grid, labels, values, row, "Timestamp Tolerance:",
+        row = addRow(runtimeGrid, labels, values, row, "Timestamp Tolerance:",
                 value(config.getTimestampToleranceMs() + " ms"));
-        row = addRow(grid, labels, values, row, "Raw Retention:",
+        row = addRow(runtimeGrid, labels, values, row, "Raw Data Retention:",
                 value(config.getRawRetentionMs() / 1000 + " s"));
-        row = addRow(grid, labels, values, row, "Aggregation Bucket:",
+        row = addRow(runtimeGrid, labels, values, row, "Aggregation Window:",
                 value(config.getAggregationBucketMs() / 1000 + " s"));
-        row = addRow(grid, labels, values, row, "Aggregate Retention:",
+        row = addRow(runtimeGrid, labels, values, row, "Aggregate Retention:",
                 value(config.getAggregateRetentionMs() / 1000 + " s"));
-        row = addRow(grid, labels, values, row, "Database:",
+        row = addRow(runtimeGrid, labels, values, row, "SQLite Database:",
                 value(config.getDatabasePath().toString()));
-        addRow(grid, labels, values, row, "Log Directory:", value(AppPaths.logsDir().toString()));
+        addRow(runtimeGrid, labels, values, row, "Log Directory:", value(AppPaths.logsDir().toString()));
 
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setOpaque(false);
-        wrapper.add(grid, BorderLayout.NORTH);
+        wrapper.add(runtimeGrid, BorderLayout.NORTH);
         return wrapper;
     }
 
     private JLabel value(String text) {
         JLabel label = new JLabel(text, SwingConstants.LEFT);
         label.setFont(UiConstants.MONO_FONT);
+        label.setForeground(UiConstants.getTextPrimary());
+        valueLabels.add(label);
         return label;
     }
 
@@ -158,9 +169,48 @@ public class SettingsPanel extends JPanel {
                        int row, String label, JLabel valueLabel) {
         labels.gridy = row;
         values.gridy = row;
-        grid.add(new JLabel(label), labels);
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(UiConstants.LABEL_FONT);
+        lbl.setForeground(UiConstants.getTextMuted());
+        grid.add(lbl, labels);
         grid.add(valueLabel, values);
+        staticLabels.add(lbl);
         return row + 1;
+    }
+
+    private void updateNotificationCardBorder() {
+        notificationGrid.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(UiConstants.getCardBorder(), 1),
+                        " ✉ Notification Configuration ", 0, 0, UiConstants.SUBTITLE_FONT, UiConstants.getAccentCyan()),
+                BorderFactory.createEmptyBorder(12, 14, 12, 14)));
+    }
+
+    private void updateRuntimeCardBorder() {
+        runtimeGrid.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(UiConstants.getCardBorder(), 1),
+                        " ⚙ System Runtime Parameters ", 0, 0, UiConstants.SUBTITLE_FONT, UiConstants.ACCENT_PURPLE),
+                BorderFactory.createEmptyBorder(12, 14, 12, 14)));
+    }
+
+    public void applyTheme(boolean isDark) {
+        setBackground(UiConstants.getPanelBackground());
+        if (notificationGrid != null) {
+            notificationGrid.setBackground(UiConstants.getCardBackground());
+            updateNotificationCardBorder();
+        }
+        if (runtimeGrid != null) {
+            runtimeGrid.setBackground(UiConstants.getCardBackground());
+            updateRuntimeCardBorder();
+        }
+        for (JLabel lbl : staticLabels) {
+            lbl.setForeground(UiConstants.getTextMuted());
+        }
+        for (JLabel val : valueLabels) {
+            val.setForeground(UiConstants.getTextPrimary());
+        }
+        refresh();
+        revalidate();
+        repaint();
     }
 
     /** Redraws the notification card from the current configuration. */
@@ -170,7 +220,7 @@ public class SettingsPanel extends JPanel {
 
         boolean configured = config != null && config.isConfigured();
         emailStatusValue.setText(configured ? "CONFIGURED" : "NOT CONFIGURED");
-        emailStatusValue.setForeground(configured ? UiConstants.ONLINE : UiConstants.OFFLINE);
+        emailStatusValue.setForeground(configured ? UiConstants.colorOf(AgentStatus.ONLINE) : UiConstants.colorOf(AgentStatus.OFFLINE));
 
         senderValue.setText(config == null || config.getUsername() == null
                 ? "-" : config.getUsername());
@@ -180,7 +230,7 @@ public class SettingsPanel extends JPanel {
         secretsFileValue.setText(secretsFile.toString());
         reasonValue.setText(configured ? "-" : String.valueOf(config == null
                 ? "no configuration loaded" : config.getDisabledReason()));
-        reasonValue.setForeground(configured ? Color.DARK_GRAY : UiConstants.WARNING);
+        reasonValue.setForeground(configured ? UiConstants.getTextDim() : UiConstants.colorOf(AgentStatus.WARNING));
     }
 
     private void onSendTestEmail() {

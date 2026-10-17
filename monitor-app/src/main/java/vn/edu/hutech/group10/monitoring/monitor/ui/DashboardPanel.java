@@ -26,7 +26,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.List;
 import java.util.function.Consumer;
@@ -47,18 +46,6 @@ public class DashboardPanel extends JPanel {
 
     private static final Logger LOG = Logger.getLogger(DashboardPanel.class.getName());
 
-    // UI styling constants (self-contained to avoid external dependency issues)
-    private static final Color STATUS_ONLINE = new Color(0x1B8A3A);
-    private static final Color STATUS_WARNING = new Color(0xC97A00);
-    private static final Color STATUS_OFFLINE = new Color(0xC62828);
-    private static final Color STATUS_UNKNOWN = new Color(0x666666);
-
-    private static final Color PANEL_BACKGROUND = new Color(0xF5F6F8);
-    private static final Color CARD_BACKGROUND = Color.WHITE;
-
-    private static final Font VALUE_FONT = new Font("SansSerif", Font.BOLD, 22);
-    private static final Font LABEL_FONT = new Font("SansSerif", Font.PLAIN, 12);
-
     private final MonitorApplication application;
     private final Consumer<String> agentSelectionListener;
 
@@ -70,9 +57,15 @@ public class DashboardPanel extends JPanel {
     private final JLabel warningValue = new JLabel("0", SwingConstants.CENTER);
     private final JLabel offlineValue = new JLabel("0", SwingConstants.CENTER);
 
+    private JPanel cardTotal, cardOnline, cardWarning, cardOffline;
+    private JLabel titleTotal, titleOnline, titleWarning, titleOffline;
+    private JLabel subTotal, subOnline, subWarning, subOffline;
+    private JScrollPane tableScrollPane;
+
     private final JButton connectButton = new JButton("Connect");
     private final JButton disconnectButton = new JButton("Disconnect");
     private final JButton configureButton = new JButton("Configure");
+    private final JButton deleteButton = new JButton("✕ Delete Agent");
 
     public DashboardPanel(MonitorApplication application, Consumer<String> agentSelectionListener) {
         super(new BorderLayout(8, 8));
@@ -80,7 +73,7 @@ public class DashboardPanel extends JPanel {
         this.agentSelectionListener = agentSelectionListener;
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        setBackground(PANEL_BACKGROUND);
+        setBackground(UiConstants.getPanelBackground());
 
         add(buildSummary(), BorderLayout.NORTH);
         add(buildTable(), BorderLayout.CENTER);
@@ -90,58 +83,130 @@ public class DashboardPanel extends JPanel {
     }
 
     private JPanel buildSummary() {
-        JPanel panel = new JPanel(new GridLayout(1, 4, 8, 0));
+        JPanel panel = new JPanel(new GridLayout(1, 4, 12, 0));
         panel.setOpaque(false);
-        panel.add(card("TOTAL SERVERS", totalValue, STATUS_UNKNOWN));
-        panel.add(card("ONLINE", onlineValue, STATUS_ONLINE));
-        panel.add(card("WARNING", warningValue, STATUS_WARNING));
-        panel.add(card("OFFLINE", offlineValue, STATUS_OFFLINE));
+
+        titleTotal = new JLabel("🖥  TOTAL SERVERS");
+        subTotal = new JLabel("Registered nodes");
+        cardTotal = buildCardPanel(titleTotal, subTotal, totalValue, UiConstants.getAccentCyan());
+
+        titleOnline = new JLabel("●  ONLINE");
+        subOnline = new JLabel("Active & healthy");
+        cardOnline = buildCardPanel(titleOnline, subOnline, onlineValue, UiConstants.colorOf(AgentStatus.ONLINE));
+
+        titleWarning = new JLabel("▲  WARNING");
+        subWarning = new JLabel("Threshold exceeded");
+        cardWarning = buildCardPanel(titleWarning, subWarning, warningValue, UiConstants.colorOf(AgentStatus.WARNING));
+
+        titleOffline = new JLabel("✖  OFFLINE");
+        subOffline = new JLabel("Heartbeat missed");
+        cardOffline = buildCardPanel(titleOffline, subOffline, offlineValue, UiConstants.colorOf(AgentStatus.OFFLINE));
+
+        panel.add(cardTotal);
+        panel.add(cardOnline);
+        panel.add(cardWarning);
+        panel.add(cardOffline);
         return panel;
     }
 
-    private JPanel card(String title, JLabel valueLabel, Color color) {
-        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
-        titleLabel.setFont(LABEL_FONT);
-        titleLabel.setForeground(STATUS_UNKNOWN);
-
-        valueLabel.setFont(VALUE_FONT);
-        valueLabel.setForeground(color);
-
-        JPanel card = new JPanel(new BorderLayout());
-        card.setBackground(CARD_BACKGROUND);
+    private JPanel buildCardPanel(JLabel titleLabel, JLabel subLabel, JLabel valueLabel, Color accentColor) {
+        JPanel card = new JPanel(new BorderLayout(4, 4));
+        card.setBackground(UiConstants.getCardBackground());
         card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(0xDDDDDD)),
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-        card.add(titleLabel, BorderLayout.NORTH);
-        card.add(valueLabel, BorderLayout.CENTER);
-        card.setPreferredSize(new Dimension(140, 76));
-        return card;
-    }
+                BorderFactory.createMatteBorder(0, 3, 0, 0, accentColor),
+                UiConstants.createCardBorder()));
 
-    private static Color colorOf(AgentStatus status) {
-        if (status == null) {
-            return STATUS_UNKNOWN;
-        }
-        switch (status) {
-            case ONLINE:
-                return STATUS_ONLINE;
-            case WARNING:
-                return STATUS_WARNING;
-            case OFFLINE:
-                return STATUS_OFFLINE;
-            default:
-                return STATUS_UNKNOWN;
-        }
+        JPanel top = new JPanel(new BorderLayout());
+        top.setOpaque(false);
+
+        titleLabel.setFont(UiConstants.SUBTITLE_FONT);
+        titleLabel.setForeground(UiConstants.getTextMuted());
+
+        JLabel dot = new JLabel("●");
+        dot.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 10));
+        dot.setForeground(accentColor);
+
+        top.add(titleLabel, BorderLayout.WEST);
+        top.add(dot, BorderLayout.EAST);
+
+        valueLabel.setFont(UiConstants.VALUE_FONT);
+        valueLabel.setForeground(accentColor);
+        valueLabel.setHorizontalAlignment(SwingConstants.LEFT);
+
+        subLabel.setFont(UiConstants.LABEL_FONT);
+        subLabel.setForeground(UiConstants.getTextDim());
+
+        card.add(top, BorderLayout.NORTH);
+        card.add(valueLabel, BorderLayout.CENTER);
+        card.add(subLabel, BorderLayout.SOUTH);
+        card.setPreferredSize(new Dimension(170, 86));
+        return card;
     }
 
     private JScrollPane buildTable() {
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table.setRowHeight(22);
+        table.setRowHeight(34);
         table.setAutoCreateRowSorter(false);
         table.setRowSorter(new TableRowSorter<>(tableModel));
         table.setFillsViewportHeight(true);
+        table.setFont(UiConstants.LABEL_FONT);
+        table.getTableHeader().setFont(UiConstants.SUBTITLE_FONT);
 
-        // Colour the status column so the state is readable at a glance.
+        // Custom zebra stripe renderer for general columns
+        DefaultTableCellRenderer baseRenderer = new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Component getTableCellRendererComponent(JTable owner, Object value,
+                                                           boolean selected, boolean focused,
+                                                           int row, int column) {
+                Component c = super.getTableCellRendererComponent(owner, value, selected, focused, row, column);
+                if (!selected) {
+                    c.setBackground(row % 2 == 0 ? UiConstants.getCardBackground() : UiConstants.getTableRowStripe());
+                    c.setForeground(UiConstants.getTextPrimary());
+                }
+                return c;
+            }
+        };
+
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(baseRenderer);
+        }
+
+        // Custom CPU and RAM usage renderer with severity color
+        DefaultTableCellRenderer metricRenderer = new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Component getTableCellRendererComponent(JTable owner, Object value,
+                                                           boolean selected, boolean focused,
+                                                           int row, int column) {
+                Component c = super.getTableCellRendererComponent(owner, value, selected, focused, row, column);
+                if (!selected) {
+                    c.setBackground(row % 2 == 0 ? UiConstants.getCardBackground() : UiConstants.getTableRowStripe());
+                    String valStr = value != null ? value.toString() : "";
+                    if (valStr.endsWith("%")) {
+                        try {
+                            double pct = Double.parseDouble(valStr.replace("%", "").trim());
+                            if (pct >= 85.0) {
+                                c.setForeground(UiConstants.colorOf(AgentStatus.OFFLINE));
+                            } else if (pct >= 70.0) {
+                                c.setForeground(UiConstants.colorOf(AgentStatus.WARNING));
+                            } else {
+                                c.setForeground(UiConstants.colorOf(AgentStatus.ONLINE));
+                            }
+                        } catch (NumberFormatException ignored) {
+                            c.setForeground(UiConstants.getTextPrimary());
+                        }
+                    } else {
+                        c.setForeground(UiConstants.getTextMuted());
+                    }
+                }
+                return c;
+            }
+        };
+        table.getColumnModel().getColumn(2).setCellRenderer(metricRenderer);
+        table.getColumnModel().getColumn(3).setCellRenderer(metricRenderer);
+
+        // Custom Status Badge Capsule Renderer
         table.getColumnModel().getColumn(7).setCellRenderer(new DefaultTableCellRenderer() {
             private static final long serialVersionUID = 1L;
 
@@ -149,11 +214,45 @@ public class DashboardPanel extends JPanel {
             public Component getTableCellRendererComponent(JTable owner, Object value,
                                                            boolean selected, boolean focused,
                                                            int row, int column) {
-                Component component = super.getTableCellRendererComponent(owner, value, selected,
-                        focused, row, column);
-                AgentStatus status = parseStatus(value);
-                component.setForeground(selected ? Color.WHITE : colorOf(status));
-                return component;
+                super.getTableCellRendererComponent(owner, value, selected, focused, row, column);
+                setHorizontalAlignment(SwingConstants.CENTER);
+                setFont(UiConstants.BADGE_FONT);
+                if (!selected) {
+                    setBackground(row % 2 == 0 ? UiConstants.getCardBackground() : UiConstants.getTableRowStripe());
+                }
+                return this;
+            }
+
+            @Override
+            protected void paintComponent(java.awt.Graphics g) {
+                java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
+                g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(getBackground());
+                g2.fillRect(0, 0, getWidth(), getHeight());
+
+                AgentStatus status = parseStatus(getText());
+                Color fg = UiConstants.colorOf(status);
+                Color bg = UiConstants.bgColorOf(status);
+
+                int padX = 10;
+                int padY = 5;
+                int w = getWidth() - (padX * 2);
+                int h = getHeight() - (padY * 2);
+                if (w > 20 && h > 10) {
+                    g2.setColor(bg);
+                    g2.fillRoundRect(padX, padY, w, h, h, h);
+                    g2.setColor(fg);
+                    g2.setStroke(new java.awt.BasicStroke(1.2f));
+                    g2.drawRoundRect(padX, padY, w, h, h, h);
+
+                    java.awt.FontMetrics fm = g2.getFontMetrics(getFont());
+                    String label = (status == AgentStatus.ONLINE ? "● " : (status == AgentStatus.WARNING ? "▲ " : "✖ ")) + status.name();
+                    int textX = padX + (w - fm.stringWidth(label)) / 2;
+                    int textY = padY + (h - fm.getHeight()) / 2 + fm.getAscent();
+                    g2.setFont(getFont());
+                    g2.drawString(label, textX, textY);
+                }
+                g2.dispose();
             }
         });
 
@@ -168,7 +267,35 @@ public class DashboardPanel extends JPanel {
             }
         });
 
-        return new JScrollPane(table);
+        tableScrollPane = new JScrollPane(table);
+        tableScrollPane.setBorder(BorderFactory.createLineBorder(UiConstants.getCardBorder(), 1));
+        return tableScrollPane;
+    }
+
+    public void applyTheme(boolean isDark) {
+        setBackground(UiConstants.getPanelBackground());
+        if (tableScrollPane != null) {
+            tableScrollPane.setBorder(BorderFactory.createLineBorder(UiConstants.getCardBorder(), 1));
+        }
+        deleteButton.setForeground(UiConstants.colorOf(AgentStatus.OFFLINE));
+        updateCardTheme(cardTotal, titleTotal, subTotal, totalValue, UiConstants.getAccentCyan());
+        updateCardTheme(cardOnline, titleOnline, subOnline, onlineValue, UiConstants.colorOf(AgentStatus.ONLINE));
+        updateCardTheme(cardWarning, titleWarning, subWarning, warningValue, UiConstants.colorOf(AgentStatus.WARNING));
+        updateCardTheme(cardOffline, titleOffline, subOffline, offlineValue, UiConstants.colorOf(AgentStatus.OFFLINE));
+        table.repaint();
+        revalidate();
+        repaint();
+    }
+
+    private void updateCardTheme(JPanel card, JLabel title, JLabel sub, JLabel val, Color accent) {
+        if (card == null) return;
+        card.setBackground(UiConstants.getCardBackground());
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 3, 0, 0, accent),
+                UiConstants.createCardBorder()));
+        if (title != null) title.setForeground(UiConstants.getTextMuted());
+        if (sub != null) sub.setForeground(UiConstants.getTextDim());
+        if (val != null) val.setForeground(accent);
     }
 
     private static AgentStatus parseStatus(Object value) {
@@ -183,24 +310,35 @@ public class DashboardPanel extends JPanel {
     }
 
     private JPanel buildButtons() {
-        JButton add = new JButton("Add Agent");
+        JButton add = new JButton("+ Add Agent");
+        add.setFont(UiConstants.SUBTITLE_FONT);
         add.addActionListener(event -> onAdd());
 
-        JButton edit = new JButton("Edit Agent");
+        JButton edit = new JButton("✎ Edit Agent");
+        edit.setFont(UiConstants.SUBTITLE_FONT);
         edit.addActionListener(event -> onEdit());
 
-        JButton delete = new JButton("Delete Agent");
-        delete.addActionListener(event -> onDelete());
+        deleteButton.setFont(UiConstants.SUBTITLE_FONT);
+        deleteButton.setForeground(UiConstants.colorOf(AgentStatus.OFFLINE));
+        deleteButton.addActionListener(event -> onDelete());
 
+        connectButton.setText("⚡ Connect");
+        connectButton.setFont(UiConstants.SUBTITLE_FONT);
         connectButton.addActionListener(event -> onConnect());
+
+        disconnectButton.setText("⏹ Disconnect");
+        disconnectButton.setFont(UiConstants.SUBTITLE_FONT);
         disconnectButton.addActionListener(event -> onDisconnect());
+
+        configureButton.setText("⚙ Configure");
+        configureButton.setFont(UiConstants.SUBTITLE_FONT);
         configureButton.addActionListener(event -> onConfigure());
 
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 6));
         panel.setOpaque(false);
         panel.add(add);
         panel.add(edit);
-        panel.add(delete);
+        panel.add(deleteButton);
         panel.add(connectButton);
         panel.add(disconnectButton);
         panel.add(configureButton);

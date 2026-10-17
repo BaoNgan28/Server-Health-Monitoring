@@ -35,14 +35,25 @@ public class TimeSeriesChartPanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Color[] SERIES_COLORS = {
-            new Color(0x1F77B4), new Color(0xD62728), new Color(0x2CA02C), new Color(0xFF7F0E)
+    private static final Color[] DARK_SERIES_COLORS = {
+            new Color(0x38, 0xBD, 0xF8), // Sky Blue (CPU)
+            new Color(0xC0, 0x84, 0xFC), // Purple (RAM)
+            new Color(0x10, 0xB9, 0x81), // Emerald (Net IN)
+            new Color(0xF5, 0x9E, 0x0B)  // Amber (Net OUT)
+    };
+
+    private static final Color[] LIGHT_SERIES_COLORS = {
+            new Color(0x1F, 0x77, 0xB4), // Original Blue
+            new Color(0xD6, 0x27, 0x28), // Original Red
+            new Color(0x2C, 0xA0, 0x2C), // Original Green
+            new Color(0xFF, 0x7F, 0x0E)  // Original Orange
     };
 
     private final TimeSeriesCollection dataset = new TimeSeriesCollection();
     private final Map<String, TimeSeries> series = new LinkedHashMap<>();
     private final int maximumItemCount;
     private final JFreeChart chart;
+    private final String[] seriesNames;
 
     /**
      * @param title            chart title
@@ -55,6 +66,7 @@ public class TimeSeriesChartPanel extends JPanel {
                                 boolean fixedRange, String... seriesNames) {
         super(new BorderLayout());
         this.maximumItemCount = maximumItemCount;
+        this.seriesNames = seriesNames;
 
         for (String name : seriesNames) {
             TimeSeries timeSeries = new TimeSeries(name);
@@ -65,13 +77,9 @@ public class TimeSeriesChartPanel extends JPanel {
 
         chart = ChartFactory.createTimeSeriesChart(title, "Time", valueAxisLabel,
                 dataset, seriesNames.length > 1, true, false);
-        chart.setBackgroundPaint(Color.WHITE);
+        chart.setAntiAlias(true);
 
         XYPlot plot = chart.getXYPlot();
-        plot.setBackgroundPaint(new Color(0xFAFAFA));
-        plot.setDomainGridlinePaint(new Color(0xDDDDDD));
-        plot.setRangeGridlinePaint(new Color(0xDDDDDD));
-
         DateAxis domainAxis = (DateAxis) plot.getDomainAxis();
         domainAxis.setAutoRange(true);
 
@@ -83,20 +91,72 @@ public class TimeSeriesChartPanel extends JPanel {
         }
 
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
-        for (int i = 0; i < seriesNames.length; i++) {
-            renderer.setSeriesPaint(i, SERIES_COLORS[i % SERIES_COLORS.length]);
-            renderer.setSeriesStroke(i, new BasicStroke(1.8f));
-        }
         plot.setRenderer(renderer);
 
         ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(520, 220));
         chartPanel.setMouseWheelEnabled(false);
-        // Zooming a live chart only fights the auto-ranging domain axis.
         chartPanel.setDomainZoomable(false);
         chartPanel.setRangeZoomable(false);
-        setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
         add(chartPanel, BorderLayout.CENTER);
+
+        applyTheme(UiConstants.isDarkMode());
+    }
+
+    /** Applies Dark or Light theme colors to the JFreeChart instance. */
+    public void applyTheme(boolean isDark) {
+        Color bg = isDark ? UiConstants.DARK_CARD_BACKGROUND : Color.WHITE;
+        Color plotBg = isDark ? UiConstants.DARK_PANEL_BACKGROUND : new Color(0xFA, 0xFA, 0xFA);
+        Color gridColor = isDark ? new Color(0x24, 0x33, 0x47) : new Color(0xDD, 0xDD, 0xDD);
+        Color borderColor = isDark ? UiConstants.DARK_CARD_BORDER : new Color(0xDD, 0xDD, 0xDD);
+        Color textColor = isDark ? UiConstants.DARK_TEXT_PRIMARY : new Color(0x22, 0x22, 0x22);
+        Color textMuted = isDark ? UiConstants.DARK_TEXT_MUTED : new Color(0x66, 0x66, 0x66);
+        Color[] colors = isDark ? DARK_SERIES_COLORS : LIGHT_SERIES_COLORS;
+
+        chart.setBackgroundPaint(bg);
+        if (chart.getTitle() != null) {
+            chart.getTitle().setPaint(textColor);
+            chart.getTitle().setFont(UiConstants.TITLE_FONT);
+        }
+        if (chart.getLegend() != null) {
+            chart.getLegend().setBackgroundPaint(bg);
+            chart.getLegend().setItemPaint(textColor);
+            chart.getLegend().setItemFont(UiConstants.LABEL_FONT);
+        }
+
+        XYPlot plot = chart.getXYPlot();
+        plot.setBackgroundPaint(plotBg);
+        plot.setDomainGridlinePaint(gridColor);
+        plot.setRangeGridlinePaint(gridColor);
+        plot.setOutlinePaint(borderColor);
+
+        DateAxis domainAxis = (DateAxis) plot.getDomainAxis();
+        domainAxis.setLabelPaint(textMuted);
+        domainAxis.setLabelFont(UiConstants.LABEL_FONT);
+        domainAxis.setTickLabelPaint(textMuted);
+        domainAxis.setTickLabelFont(UiConstants.LABEL_FONT);
+        domainAxis.setAxisLinePaint(borderColor);
+        domainAxis.setTickMarkPaint(borderColor);
+
+        NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+        rangeAxis.setLabelPaint(textMuted);
+        rangeAxis.setLabelFont(UiConstants.LABEL_FONT);
+        rangeAxis.setTickLabelPaint(textMuted);
+        rangeAxis.setTickLabelFont(UiConstants.LABEL_FONT);
+        rangeAxis.setAxisLinePaint(borderColor);
+        rangeAxis.setTickMarkPaint(borderColor);
+
+        XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
+        float strokeWidth = isDark ? 2.2f : 1.8f;
+        for (int i = 0; i < seriesNames.length; i++) {
+            renderer.setSeriesPaint(i, colors[i % colors.length]);
+            renderer.setSeriesStroke(i, new BasicStroke(strokeWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        }
+
+        setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(borderColor, 1),
+                BorderFactory.createEmptyBorder(4, 4, 4, 4)));
+        repaint();
     }
 
     /**
