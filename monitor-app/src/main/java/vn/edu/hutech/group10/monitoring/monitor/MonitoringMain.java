@@ -6,6 +6,7 @@ import vn.edu.hutech.group10.monitoring.monitor.config.MonitorConfig;
 import vn.edu.hutech.group10.monitoring.monitor.config.MonitorConfigLoader;
 import vn.edu.hutech.group10.monitoring.monitor.core.MonitorApplication;
 import vn.edu.hutech.group10.monitoring.monitor.ui.MainFrame;
+import vn.edu.hutech.group10.monitoring.monitor.ui.UiConstants;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -103,11 +104,29 @@ public final class MonitoringMain {
 
     private static void applyLookAndFeel() {
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ReflectiveOperationException | UnsupportedOperationException
-                 | javax.swing.UnsupportedLookAndFeelException e) {
-            // The cross-platform look and feel is always available; carry on with it.
-            LOG.log(Level.FINE, "Falling back to the default look and feel", e);
+            com.formdev.flatlaf.FlatDarkLaf.setup();
+            UIManager.put("Component.arc", 8);
+            UIManager.put("Button.arc", 8);
+            UIManager.put("TextComponent.arc", 8);
+            UIManager.put("ProgressBar.arc", 8);
+            UIManager.put("ScrollBar.showButtons", false);
+            UIManager.put("ScrollBar.width", 10);
+            UIManager.put("TabbedPane.showTabSeparators", true);
+            UIManager.put("TabbedPane.tabHeight", 38);
+            UIManager.put("TabbedPane.underlineColor", UiConstants.ACCENT_CYAN);
+            UIManager.put("TabbedPane.underlineHeight", 3);
+            UIManager.put("Table.rowHeight", 34);
+            UIManager.put("Table.showHorizontalLines", true);
+            UIManager.put("Table.showVerticalLines", false);
+            UIManager.put("Table.gridColor", UiConstants.CARD_BORDER);
+            UIManager.put("TableHeader.height", 34);
+        } catch (Exception e) {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (ReflectiveOperationException | UnsupportedOperationException
+                     | javax.swing.UnsupportedLookAndFeelException fallbackError) {
+                LOG.log(Level.FINE, "Falling back to the default look and feel", fallbackError);
+            }
         }
     }
 
