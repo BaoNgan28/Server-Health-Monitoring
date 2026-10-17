@@ -49,6 +49,8 @@ public class HistoryPanel extends JPanel {
             new JComboBox<>(HistoryService.Range.values());
     private final JButton refreshButton = new JButton("Load");
     private final JLabel sourceLabel = new JLabel(" ");
+    private JLabel nodeLbl;
+    private JLabel rangeLbl;
 
     private final TimeSeriesChartPanel usageChart;
     private final TimeSeriesChartPanel networkChart;
@@ -63,20 +65,36 @@ public class HistoryPanel extends JPanel {
                 false, SERIES_IN, SERIES_OUT);
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        setBackground(UiConstants.PANEL_BACKGROUND);
+        setBackground(UiConstants.getPanelBackground());
 
         add(buildControls(), BorderLayout.NORTH);
         add(buildCharts(), BorderLayout.CENTER);
     }
 
     private JPanel buildControls() {
+        refreshButton.setText("📊 Query History");
+        refreshButton.setFont(UiConstants.SUBTITLE_FONT);
         refreshButton.addActionListener(event -> loadHistory());
 
-        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        agentSelector.setFont(UiConstants.SUBTITLE_FONT);
+        rangeSelector.setFont(UiConstants.SUBTITLE_FONT);
+        sourceLabel.setFont(UiConstants.SUBTITLE_FONT);
+        sourceLabel.setForeground(UiConstants.getAccentCyan());
+
+        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 6));
         row.setOpaque(false);
-        row.add(new JLabel("Agent:"));
+
+        nodeLbl = new JLabel("Target Node:");
+        nodeLbl.setFont(UiConstants.SUBTITLE_FONT);
+        nodeLbl.setForeground(UiConstants.getTextMuted());
+
+        rangeLbl = new JLabel("Time Window:");
+        rangeLbl.setFont(UiConstants.SUBTITLE_FONT);
+        rangeLbl.setForeground(UiConstants.getTextMuted());
+
+        row.add(nodeLbl);
         row.add(agentSelector);
-        row.add(new JLabel("Range:"));
+        row.add(rangeLbl);
         row.add(rangeSelector);
         row.add(refreshButton);
         row.add(sourceLabel);
@@ -89,6 +107,17 @@ public class HistoryPanel extends JPanel {
         charts.add(usageChart);
         charts.add(networkChart);
         return charts;
+    }
+
+    public void applyTheme(boolean isDark) {
+        setBackground(UiConstants.getPanelBackground());
+        if (nodeLbl != null) nodeLbl.setForeground(UiConstants.getTextMuted());
+        if (rangeLbl != null) rangeLbl.setForeground(UiConstants.getTextMuted());
+        sourceLabel.setForeground(UiConstants.getAccentCyan());
+        usageChart.applyTheme(isDark);
+        networkChart.applyTheme(isDark);
+        revalidate();
+        repaint();
     }
 
     /** Refreshes the agent list, keeping the current choice when it still exists. */
