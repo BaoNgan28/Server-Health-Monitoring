@@ -1,5 +1,6 @@
 package vn.edu.hutech.group10.monitoring.monitor.ui;
 
+import vn.edu.hutech.group10.monitoring.common.model.AgentStatus;
 import vn.edu.hutech.group10.monitoring.common.util.ByteRateFormatter;
 import vn.edu.hutech.group10.monitoring.common.util.TimeUtil;
 import vn.edu.hutech.group10.monitoring.monitor.core.MonitorApplication;
@@ -13,8 +14,10 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -50,6 +53,11 @@ public class ServerDetailPanel extends JPanel {
     private final JLabel networkOutValue = new JLabel("-");
     private final JLabel packetsValue = new JLabel("-");
 
+    private JLabel targetNodeLabel;
+    private final List<JPanel> metricCards = new ArrayList<>();
+    private final List<JLabel> cardTitles = new ArrayList<>();
+    private final List<Color> cardAccents = new ArrayList<>();
+
     private final TimeSeriesChartPanel cpuChart;
     private final TimeSeriesChartPanel memoryChart;
     private final TimeSeriesChartPanel networkChart;
@@ -68,16 +76,22 @@ public class ServerDetailPanel extends JPanel {
                 SERIES_IN, SERIES_OUT);
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        setBackground(UiConstants.PANEL_BACKGROUND);
+        setBackground(UiConstants.getPanelBackground());
 
         add(buildHeader(), BorderLayout.NORTH);
         add(buildCharts(), BorderLayout.CENTER);
     }
 
     private JPanel buildHeader() {
-        JPanel selectorRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        JPanel selectorRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 4));
         selectorRow.setOpaque(false);
-        selectorRow.add(new JLabel("Agent:"));
+        targetNodeLabel = new JLabel("Target Node:");
+        targetNodeLabel.setFont(UiConstants.SUBTITLE_FONT);
+        targetNodeLabel.setForeground(UiConstants.getTextMuted());
+        selectorRow.add(targetNodeLabel);
+
+        agentSelector.setFont(UiConstants.SUBTITLE_FONT);
+        agentSelector.setPreferredSize(new Dimension(180, 30));
         agentSelector.addActionListener(event -> {
             if (!updatingSelector) {
                 onAgentSelected();
@@ -85,48 +99,99 @@ public class ServerDetailPanel extends JPanel {
         });
         selectorRow.add(agentSelector);
 
-        JPanel grid = new JPanel(new GridLayout(0, 4, 10, 4));
-        grid.setBackground(UiConstants.CARD_BACKGROUND);
-        grid.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(0xDDDDDD)),
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+        // Status chip
+        statusValue.setFont(UiConstants.BADGE_FONT);
+        statusValue.setForeground(UiConstants.colorOf(AgentStatus.ONLINE));
+        statusValue.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(UiConstants.getCardBorder(), 1),
+                BorderFactory.createEmptyBorder(4, 10, 4, 10)));
+        selectorRow.add(statusValue);
 
-        addField(grid, "Name", nameValue);
-        addField(grid, "Address", addressValue);
-        addField(grid, "Status", statusValue);
-        addField(grid, "Last Seen", lastSeenValue);
-        addField(grid, "CPU", cpuValue);
-        addField(grid, "Memory", memoryValue);
-        addField(grid, "Connections", connectionsValue);
-        addField(grid, "Uptime", uptimeValue);
-        addField(grid, "Network IN", networkInValue);
-        addField(grid, "Network OUT", networkOutValue);
-        addField(grid, "Packets", packetsValue);
+        JPanel grid = new JPanel(new GridLayout(2, 4, 10, 10));
+        grid.setOpaque(false);
 
-        JPanel header = new JPanel(new BorderLayout(4, 4));
+        grid.add(createMetricCard("CPU USAGE", cpuValue, UiConstants.getAccentCyan(), "⚡"));
+        grid.add(createMetricCard("MEMORY USAGE", memoryValue, UiConstants.ACCENT_PURPLE, "💾"));
+        grid.add(createMetricCard("NETWORK IN", networkInValue, UiConstants.colorOf(AgentStatus.ONLINE), "↓"));
+        grid.add(createMetricCard("NETWORK OUT", networkOutValue, UiConstants.colorOf(AgentStatus.WARNING), "↑"));
+        grid.add(createMetricCard("CONNECTIONS", connectionsValue, UiConstants.getTextPrimary(), "🔗"));
+        grid.add(createMetricCard("SYSTEM UPTIME", uptimeValue, UiConstants.getTextPrimary(), "⏱"));
+        grid.add(createMetricCard("NODE ADDRESS", addressValue, UiConstants.getTextPrimary(), "🌐"));
+        grid.add(createMetricCard("PACKETS STATS", packetsValue, UiConstants.getTextMuted(), "📦"));
+
+        JPanel header = new JPanel(new BorderLayout(6, 6));
         header.setOpaque(false);
         header.add(selectorRow, BorderLayout.NORTH);
         header.add(grid, BorderLayout.CENTER);
         return header;
     }
 
-    private void addField(JPanel grid, String label, JLabel valueLabel) {
-        JLabel title = new JLabel(label, SwingConstants.LEFT);
-        title.setFont(UiConstants.LABEL_FONT);
-        title.setForeground(UiConstants.UNKNOWN);
+    private JPanel createMetricCard(String title, JLabel valueLabel, Color accentColor, String icon) {
+        JPanel card = new JPanel(new BorderLayout(4, 4));
+        card.setBackground(UiConstants.getCardBackground());
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 3, 0, 0, accentColor),
+                UiConstants.createCardBorder()));
 
-        JPanel cell = new JPanel(new BorderLayout());
-        cell.setOpaque(false);
-        cell.add(title, BorderLayout.NORTH);
-        cell.add(valueLabel, BorderLayout.CENTER);
-        grid.add(cell);
+        JLabel titleLabel = new JLabel(icon + "  " + title);
+        titleLabel.setFont(UiConstants.BADGE_FONT);
+        titleLabel.setForeground(UiConstants.getTextMuted());
+
+        valueLabel.setFont(UiConstants.METRIC_FONT);
+        valueLabel.setForeground(accentColor);
+        valueLabel.setHorizontalAlignment(SwingConstants.LEFT);
+
+        card.add(titleLabel, BorderLayout.NORTH);
+        card.add(valueLabel, BorderLayout.CENTER);
+
+        metricCards.add(card);
+        cardTitles.add(titleLabel);
+        cardAccents.add(accentColor);
+        return card;
+    }
+
+    public void applyTheme(boolean isDark) {
+        setBackground(UiConstants.getPanelBackground());
+        if (targetNodeLabel != null) {
+            targetNodeLabel.setForeground(UiConstants.getTextMuted());
+        }
+        statusValue.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(UiConstants.getCardBorder(), 1),
+                BorderFactory.createEmptyBorder(4, 10, 4, 10)));
+        for (int i = 0; i < metricCards.size(); i++) {
+            JPanel card = metricCards.get(i);
+            card.setBackground(UiConstants.getCardBackground());
+            Color acc = cardAccents.get(i);
+            card.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(0, 3, 0, 0, acc),
+                    UiConstants.createCardBorder()));
+            if (i < cardTitles.size()) {
+                cardTitles.get(i).setForeground(UiConstants.getTextMuted());
+            }
+        }
+        connectionsValue.setForeground(UiConstants.getTextPrimary());
+        uptimeValue.setForeground(UiConstants.getTextPrimary());
+        addressValue.setForeground(UiConstants.getTextPrimary());
+        packetsValue.setForeground(UiConstants.getTextMuted());
+
+        cpuChart.applyTheme(isDark);
+        memoryChart.applyTheme(isDark);
+        networkChart.applyTheme(isDark);
+
+        revalidate();
+        repaint();
     }
 
     private JPanel buildCharts() {
-        JPanel charts = new JPanel(new GridLayout(3, 1, 0, 8));
+        JPanel charts = new JPanel(new GridLayout(2, 1, 0, 8));
         charts.setOpaque(false);
-        charts.add(cpuChart);
-        charts.add(memoryChart);
+
+        JPanel topRow = new JPanel(new GridLayout(1, 2, 8, 0));
+        topRow.setOpaque(false);
+        topRow.add(cpuChart);
+        topRow.add(memoryChart);
+
+        charts.add(topRow);
         charts.add(networkChart);
         return charts;
     }

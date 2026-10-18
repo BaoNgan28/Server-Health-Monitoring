@@ -30,6 +30,7 @@
         <jfreechart.version>1.5.5</jfreechart.version>
         <jakarta.mail.version>2.0.1</jakarta.mail.version>
         <slf4j.version>2.0.13</slf4j.version>
+        <flatlaf.version>3.5.4</flatlaf.version>
         <junit.version>5.10.2</junit.version>
 
         <maven.compiler.plugin.version>3.13.0</maven.compiler.plugin.version>
@@ -80,6 +81,12 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-jdk14</artifactId>
                 <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.formdev</groupId>
+                <artifactId>flatlaf</artifactId>
+                <version>${flatlaf.version}</version>
             </dependency>
 
             <dependency>
