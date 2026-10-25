@@ -1,0 +1,175 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="840" viewBox="0 0 1400 840" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <filter id="softShadow" x="-2%" y="-6%" width="104%" height="112%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0F172A" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrowDown" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L9,4 L0,8 Z" fill="#2563EB"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1400" height="840" fill="#FFFFFF"/>
+
+  <text x="40" y="46" font-size="24" font-weight="bold" fill="#0F172A">Các lớp của monitor-app</text>
+  <text x="40" y="70" font-size="13" fill="#64748B">Server Health Monitoring — Group 10 HUTECH</text>
+  <line x1="40" y1="88" x2="1360" y2="88" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- Lop 1: Giao dien Swing -->
+  <g>
+    <rect x="40" y="110" width="1100" height="100" rx="14" fill="#EFF6FF" stroke="#60A5FA" stroke-width="1.5" filter="url(#softShadow)"/>
+    <circle cx="74" cy="151" r="11" fill="#2563EB"/>
+    <text x="74" y="155.5" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">1</text>
+    <text x="95" y="156" font-size="15" font-weight="bold" fill="#0F172A">Giao diện Swing (UI)</text>
+    <text x="95" y="178" font-size="11" fill="#64748B">MainFrame + 5 tab, bảng, biểu đồ</text>
+    <g font-family="Consolas, monospace" font-size="12" fill="#1E293B" text-anchor="middle">
+      <rect x="300" y="131" width="77" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="338.5" y="148.5">MainFrame</text>
+      <rect x="387" y="131" width="110" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="442" y="148.5">DashboardPanel</text>
+      <rect x="507" y="131" width="130" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="572" y="148.5">ServerDetailPanel</text>
+      <rect x="300" y="163" width="97" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="348.5" y="180.5">HistoryPanel</text>
+      <rect x="407" y="163" width="84" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="449" y="180.5">AlertPanel</text>
+      <rect x="501" y="163" width="143" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="572.5" y="180.5">TimeSeriesChartPanel</text>
+    </g>
+  </g>
+
+  <!-- Lop 2: Service / dieu phoi -->
+  <g>
+    <rect x="40" y="236" width="1100" height="100" rx="14" fill="#F5F3FF" stroke="#A78BFA" stroke-width="1.5" filter="url(#softShadow)"/>
+    <circle cx="74" cy="277" r="11" fill="#7C3AED"/>
+    <text x="74" y="281.5" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">2</text>
+    <text x="95" y="282" font-size="15" font-weight="bold" fill="#0F172A">Service / điều phối</text>
+    <text x="95" y="304" font-size="11" fill="#64748B">Telemetry, cảnh báo, event bus</text>
+    <g font-family="Consolas, monospace" font-size="12" fill="#1E293B" text-anchor="middle">
+      <rect x="300" y="257" width="117" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="358.5" y="274.5">TelemetryService</text>
+      <rect x="427" y="257" width="97" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="475.5" y="274.5">AlertService</text>
+      <rect x="534" y="257" width="130" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="599" y="274.5">AggregationService</text>
+      <rect x="300" y="289" width="117" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="358.5" y="306.5">HeartbeatMonitor</text>
+      <rect x="427" y="289" width="104" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="479" y="306.5">HistoryService</text>
+      <rect x="541" y="289" width="110" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="596" y="306.5">MonitorEventBus</text>
+    </g>
+  </g>
+
+  <!-- Lop 3: Network -->
+  <g>
+    <rect x="40" y="362" width="1100" height="100" rx="14" fill="#FFF7ED" stroke="#FDBA74" stroke-width="1.5" filter="url(#softShadow)"/>
+    <circle cx="74" cy="403" r="11" fill="#EA580C"/>
+    <text x="74" y="407.5" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">3</text>
+    <text x="95" y="408" font-size="15" font-weight="bold" fill="#0F172A">Network</text>
+    <text x="95" y="430" font-size="11" fill="#64748B">Nhận gói UDP, kết nối TCP</text>
+    <g font-family="Consolas, monospace" font-size="12" fill="#1E293B" text-anchor="middle">
+      <rect x="300" y="399" width="150" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="375" y="416.5">UdpTelemetryReceiver</text>
+      <rect x="460" y="399" width="143" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="531.5" y="416.5">AgentTcpConnection</text>
+      <rect x="613" y="399" width="176" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="701" y="416.5">AgentTcpConnectionManager</text>
+    </g>
+  </g>
+
+  <!-- Lop 4: Storage -->
+  <g>
+    <rect x="40" y="488" width="1100" height="100" rx="14" fill="#F0FDF4" stroke="#34D399" stroke-width="1.5" filter="url(#softShadow)"/>
+    <circle cx="74" cy="529" r="11" fill="#16A34A"/>
+    <text x="74" y="533.5" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">4</text>
+    <text x="95" y="534" font-size="15" font-weight="bold" fill="#0F172A">Storage</text>
+    <text x="95" y="556" font-size="11" fill="#64748B">SQLite qua DatabaseManager</text>
+    <g font-family="Consolas, monospace" font-size="12" fill="#1E293B" text-anchor="middle">
+      <rect x="300" y="509" width="117" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="358.5" y="526.5">DatabaseManager</text>
+      <rect x="427" y="509" width="117" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="485.5" y="526.5">AgentRepository</text>
+      <rect x="554" y="509" width="117" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="612.5" y="526.5">MetricRepository</text>
+      <rect x="300" y="541" width="110" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="355" y="558.5">AlertRepository</text>
+      <rect x="420" y="541" width="124" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="482" y="558.5">DataAccessException</text>
+    </g>
+  </g>
+
+  <!-- Lop 5: Config -->
+  <g>
+    <rect x="40" y="614" width="1100" height="100" rx="14" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.5" filter="url(#softShadow)"/>
+    <circle cx="74" cy="655" r="11" fill="#64748B"/>
+    <text x="74" y="659.5" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">5</text>
+    <text x="95" y="660" font-size="15" font-weight="bold" fill="#0F172A">Config</text>
+    <text x="95" y="682" font-size="11" fill="#64748B">Cấu hình runtime và SMTP</text>
+    <g font-family="Consolas, monospace" font-size="12" fill="#1E293B" text-anchor="middle">
+      <rect x="300" y="651" width="97" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="348.5" y="668.5">MonitorConfig</text>
+      <rect x="407" y="651" width="143" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="478.5" y="668.5">MonitorConfigLoader</text>
+      <rect x="560" y="651" width="91" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="605.5" y="668.5">EmailConfig</text>
+      <rect x="661" y="651" width="130" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="726" y="668.5">EmailConfigLoader</text>
+    </g>
+  </g>
+
+  <!-- Mang duoi: monitoring-common -->
+  <g>
+    <rect x="40" y="744" width="1100" height="60" rx="14" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5" filter="url(#softShadow)"/>
+    <circle cx="74" cy="765" r="11" fill="#7C3AED"/>
+    <text x="74" y="769.5" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">C</text>
+    <text x="95" y="770" font-size="14" font-weight="bold" fill="#6D28D9">monitoring-common</text>
+    <text x="95" y="790" font-size="11" fill="#64748B">Giao thức và mã hóa dùng chung</text>
+    <g font-family="Consolas, monospace" font-size="12" fill="#1E293B" text-anchor="middle">
+      <rect x="300" y="761" width="130" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="365" y="778.5">ProtocolConstants</text>
+      <rect x="440" y="761" width="124" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="502" y="778.5">JsonMessageCodec</text>
+      <rect x="574" y="761" width="91" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="619.5" y="778.5">PacketSigner</text>
+      <rect x="675" y="761" width="71" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="710.5" y="778.5">TimeUtil</text>
+      <rect x="756" y="761" width="117" height="26" rx="13" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="814.5" y="778.5">PacketValidator</text>
+    </g>
+  </g>
+
+  <!-- Mui ten goi xuong -->
+  <g stroke="#2563EB" stroke-width="1.8" fill="none">
+    <line x1="590" y1="214" x2="590" y2="232" marker-end="url(#arrowDown)"/>
+    <line x1="590" y1="340" x2="590" y2="358" marker-end="url(#arrowDown)"/>
+    <line x1="590" y1="466" x2="590" y2="484" marker-end="url(#arrowDown)"/>
+    <line x1="590" y1="592" x2="590" y2="610" marker-end="url(#arrowDown)"/>
+    <line x1="590" y1="718" x2="590" y2="740" marker-end="url(#arrowDown)"/>
+  </g>
+  <g font-size="10" fill="#94A3B8">
+    <text x="604" y="226">gọi xuống</text>
+    <text x="604" y="352">gọi xuống</text>
+    <text x="604" y="478">gọi xuống</text>
+    <text x="604" y="604">gọi xuống</text>
+    <text x="604" y="732">gọi xuống</text>
+  </g>
+
+  <!-- Cot ghi chu ben phai -->
+  <text x="1170" y="104" font-size="10" font-weight="bold" letter-spacing="1.2" fill="#94A3B8">GHI CHÚ</text>
+  <g stroke="#CBD5E1" stroke-width="1" stroke-dasharray="3 3">
+    <line x1="1144" y1="266" x2="1168" y2="266"/>
+    <line x1="1144" y1="306" x2="1168" y2="306"/>
+    <line x1="1144" y1="412" x2="1168" y2="412"/>
+    <line x1="1144" y1="538" x2="1168" y2="538"/>
+  </g>
+  <g>
+    <rect x="1170" y="252" width="190" height="28" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+    <text x="1182" y="270" font-size="11" fill="#64748B">Cửa sổ tổng hợp 5 phút</text>
+    <rect x="1170" y="292" width="190" height="28" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+    <text x="1182" y="310" font-size="11" fill="#64748B">Cảnh báo email</text>
+    <rect x="1170" y="398" width="190" height="28" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+    <text x="1182" y="416" font-size="11" fill="#64748B">Nhận UDP 6000</text>
+    <rect x="1170" y="524" width="190" height="28" rx="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+    <text x="1182" y="542" font-size="11" fill="#64748B">Lưu SQLite</text>
+  </g>
+</svg>
